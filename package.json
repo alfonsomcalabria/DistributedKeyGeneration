@@ -1,0 +1,23 @@
+{
+  "name": "shamirsecret",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alfonsomcalabria/ShamirSecret.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alfonsomcalabria/ShamirSecret/issues"
+  },
+  "homepage": "https://github.com/alfonsomcalabria/ShamirSecret#readme",
+  "dependencies": {
+    "bn.js": "^5.2.0",
+    "express": "^4.17.1"
+  }
+}
