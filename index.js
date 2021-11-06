@@ -6,7 +6,7 @@ const port = 3000
 
 app.get('/', (req, res) => {
   res.send('Prova')
-  script.share_secret('ciao', 6,3);
+  script.share_secret(150, 6,3);
 })
 
 
