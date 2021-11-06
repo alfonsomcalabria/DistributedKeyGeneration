@@ -26,7 +26,7 @@ function share_secret(secret, n, k){
     //var string = x.toString(32);
     //console.log(x);
     //console.log(string);
-    var secretRec = recover_secret(c_shares, 2)
+    var secretRec = recover_secret(c_shares, 3)
     console.log(secretRec);
 }
 
