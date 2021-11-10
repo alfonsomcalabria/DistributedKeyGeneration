@@ -19,6 +19,7 @@
   "dependencies": {
     "big-integer": "^1.6.50",
     "bn.js": "^5.2.0",
+    "crypto": "^1.0.1",
     "express": "^4.17.1",
     "web3": "^1.6.0"
   }

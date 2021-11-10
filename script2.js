@@ -1,30 +1,35 @@
 const BN = require('bn.js')
 
 //var p = new BN(21888242871839275222246405745257275088548364400416034343698204186575808495617);
-var p = new BN(10007);
+var p = new BN(500057);
 var threshold = new BN(0);
+var random = new BN(Math.random());
 
 function share_secret(secret, n, k){
     var shares = new Array(n);
     threshold = k;
-    var secretNumber = new BN(secret, 16);
+    var secretNumber = new BN(secret, 32);
     console.log("secretNumber: "+secretNumber)
     //calcolo coefficienti
-    var coefficients = new Array(k-1);
-    //coefficients[0] = secretNumber;
+    var coefficients = new Array(k);
+    coefficients[0] = secretNumber;
+    console.log("coefficients[0]: "+coefficients[0]);
     //console.log("coefficients[0]: "+coefficients[0])
-    for(i=0; i<k-1; i++){
+    for(i=1; i<k; i++){
         coefficients[i] = new BN(Math.random()*p);
         console.log("coefficients[ "+i+"]: "+coefficients[i]);
     }
     //calcolo pezzi
-    for(j=0; j<shares.length; j++){
+    for(j=0; j<n; j++){
         shares[j] = new BN(0);
-        var sum = new BN(f(coefficients, j+1, k));
+/*         var sum = new BN(f(coefficients, j+1, k));
         sum = sum.add(secretNumber);
-        sum = sum.mod(p);
-        shares[j] = shares[j].add(sum);
-        console.log("shares["+j+"]: "+shares[j]+"\n");
+        sum = sum.mod(p); */
+        //shares[j] = shares[j].add(sum);
+        shares[j].value = new BN(f(coefficients, j+1, k));
+        shares[j].x =  new BN(j+1);
+        console.log("shares["+j+"]: "+shares[j].value+"\n");
+        console.log("shares["+j+"]: "+shares[j].x+"\n")
 /*      console.log("type share["+j+"]: "+typeof(shares[j]));
         console.log("type secretNumber: "+typeof(secretNumber));
         console.log("type sum: "+typeof(sum)); */
@@ -33,23 +38,40 @@ function share_secret(secret, n, k){
 
     //return shares
     var c_shares = new Array(3);
-    c_shares[0] = new BN(shares[0]);
-    c_shares[1] = new BN(shares[1]);
-    c_shares[2] = new BN(shares[2]);
+    for(i=0; i<3; i++){
+        c_shares[i] = new BN(0);
+    }
+    c_shares[0].value = shares[2].value;
+    c_shares[0].x = shares[2].x;
+    c_shares[1].value = shares[5].value;
+    c_shares[1].x = shares[5].x;
+    c_shares[2].value = shares[4].value;
+    c_shares[2].x = shares[4].x;
+    
+    
+    
+    for (i=0; i<3; i++){
+        console.log("c_shares["+i+"]: "+shares[i].value);
+        console.log("c_shares["+i+"]: "+c_shares[i].x+"\n")
+    }
     var secretRec = new BN(recover_secret(c_shares, 3));
     console.log("Number Segreto: "+secretRec); 
+    console.log("Segreto: "+secretRec.toString(32));
 
 }
 
 function f(coefficients, x, k){
     var pol = new Array(k-1);
     var sum = new BN(0);
-    for(i=0; i<k-1; i++){
-        pol[i] = new BN(coefficients[i]*Math.pow(x, i+1));
+    for(i=0; i<k; i++){
+        var base = new BN(x);
+        var esp = new BN(i);
+        pol[i] = new BN(coefficients[i].mul((base.pow(esp).mod(p))));   //mod(p) aggiunto
         //console.log("typeof pol["+i+"]: "+typeof(pol[i]));
         sum = sum.add(pol[i]);
         //console.log("type sum: "+typeof(sum));
     }
+    sum = sum.mod(p);
 
     return sum;
 }
@@ -58,11 +80,11 @@ function recover_secret(shares, k){
     var sum = new BN(0);
     if(k<threshold){
         console.log("Errore");
-        return 1; //DA VEDEREE
+        process.exit();
     }
     //interpolazione lagrange
-    for(i=1; i<=k; i++){
-       sum = sum.add(shares[i-1].mul(lagrange_coefficient(i, shares)));
+    for(i=0; i<shares.length; i++){
+       sum = sum.add(shares[i].value.mul(lagrange_coefficient(i, shares)));
        //console.log("sum["+i+"]: "+sum);
        //console.log("sum type :"+typeof(sum));
     }
@@ -74,19 +96,32 @@ function recover_secret(shares, k){
 function lagrange_coefficient(i, shares){
     var result = new BN(1);
     //console.log("result type :"+typeof(result));
-    for(j=1; j<=shares.length; j++){
+    for(j=0; j<shares.length; j++){
         if(i != j){
-            var jBN = new BN(j);
-            var a = new BN(j-i);
+            //console.log("indice i:"+i+"\nindice j:"+j)
+            var prod = new BN(1);
+            var jBN = new BN(shares[j].x);
+            var diff = new BN(shares[j].x);
+            var iBN = new BN(shares[i].x);
+            diff = diff.sub(iBN);
+           // console.log("diff: "+diff)
            // console.log("a type :"+typeof(a));
-            a = a.mod(p);
+            diff = diff.mod(p);
+           // console.log("diff mod p: "+diff)
            // console.log("a type dopo modulo :"+typeof(a));
-            a = a.invm(p);
+            diff = diff.invm(p);
+           // console.log("diff invm p: "+diff)
             //console.log("type a dopo invm: "+typeof(a));
-            result = result.mul(jBN);
-            result = result.mul(a);
+            prod = prod.mul(jBN);
+           // console.log("prod per j: "+prod);
+            prod = prod.mul(diff);
+          //  console.log("prod per diff: "+prod);
+            result = result.mul(prod);
+            //result = result.mul(a);
+
            // console.log("type result dopo molt: "+typeof(result));
             result = result.mod(p);
+           // console.log("result produttoria: :"+ result);
             //console.log("type result dopo mod: "+typeof(result));
             
         }

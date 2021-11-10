@@ -51,7 +51,7 @@ function recover_secret(shares, k){
     var prod = 1;
     if(k<threshold){
         console.log("Errore");
-        return 1; //DA VEDEREE
+        process.exit();
     }
     //interpolazione lagrange
     for(i=1; i<=shares.length; i++){

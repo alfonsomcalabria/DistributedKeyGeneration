@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
 
 app.get('/secret', (req, res) => {
   res.send('Calcolo...')
-  script.share_secret(10007, 6,3);
+  script.share_secret(123, 6,3);
 })
 
 
