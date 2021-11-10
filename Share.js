@@ -6,6 +6,6 @@ class Share{
         this.value = value;
         this.x = x;
     }
-
 }
+
 module.exports = Share;

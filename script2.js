@@ -1,4 +1,5 @@
 const BN = require('bn.js')
+const Share = require('./Share');
 
 //var p = new BN(21888242871839275222246405745257275088548364400416034343698204186575808495617);
 var p = new BN(500057);
@@ -21,13 +22,14 @@ function share_secret(secret, n, k){
     }
     //calcolo pezzi
     for(j=0; j<n; j++){
-        shares[j] = new BN(0);
+        //shares[j] = new BN(0);
+        shares[j] = new Share(new BN(f(coefficients, j+1, k)), new BN(j+1));
 /*         var sum = new BN(f(coefficients, j+1, k));
         sum = sum.add(secretNumber);
         sum = sum.mod(p); */
         //shares[j] = shares[j].add(sum);
-        shares[j].value = new BN(f(coefficients, j+1, k));
-        shares[j].x =  new BN(j+1);
+       // shares[j].value = new BN(f(coefficients, j+1, k));
+       // shares[j].x =  new BN(j+1);
         console.log("shares["+j+"]: "+shares[j].value+"\n");
         console.log("shares["+j+"]: "+shares[j].x+"\n")
 /*      console.log("type share["+j+"]: "+typeof(shares[j]));
@@ -38,22 +40,13 @@ function share_secret(secret, n, k){
 
     //return shares
     var c_shares = new Array(3);
-    for(i=0; i<3; i++){
-        c_shares[i] = new BN(0);
-    }
-    c_shares[0].value = shares[2].value;
-    c_shares[0].x = shares[2].x;
-    c_shares[1].value = shares[5].value;
-    c_shares[1].x = shares[5].x;
-    c_shares[2].value = shares[4].value;
-    c_shares[2].x = shares[4].x;
+   
+    c_shares[0] = new Share(new BN(shares[3].value), new BN(shares[3].x));
+    c_shares[1] = new Share(new BN(shares[0].value), new BN(shares[0].x));
+    c_shares[2] = new Share(new BN(shares[5].value), new BN(shares[5].x));
+
     
     
-    
-    for (i=0; i<3; i++){
-        console.log("c_shares["+i+"]: "+shares[i].value);
-        console.log("c_shares["+i+"]: "+c_shares[i].x+"\n")
-    }
     var secretRec = new BN(recover_secret(c_shares, 3));
     console.log("Number Segreto: "+secretRec); 
     console.log("Segreto: "+secretRec.toString(32));
@@ -84,7 +77,7 @@ function recover_secret(shares, k){
     }
     //interpolazione lagrange
     for(i=0; i<shares.length; i++){
-       sum = sum.add(shares[i].value.mul(lagrange_coefficient(i, shares)));
+       sum = sum.add((shares[i].value).mul(lagrange_coefficient(i, shares)));
        //console.log("sum["+i+"]: "+sum);
        //console.log("sum type :"+typeof(sum));
     }
