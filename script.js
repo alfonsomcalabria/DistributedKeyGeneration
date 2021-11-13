@@ -1,11 +1,10 @@
 const BN = require('bn.js')
 const Share = require('./Share');
+const crypto = require('crypto');
 
-var p = new BN("30644E72E131A029B85045B68181585D2833E84879B9709143E1F593F0000001", 'hex');
-//var p = new BN(21888242871839275222246405745257275088548364400416034343698204186575808495617);
-//var p = new BN(500057);
+//var p = new BN("30644E72E131A029B85045B68181585D2833E84879B9709143E1F593F0000001", 'hex');
+var p = new BN("21888242871839275222246405745257275088548364400416034343698204186575808495617");
 var threshold = new BN(0);
-
 
 function share_secret(secret, n, k){
     var shares = new Array(n);
@@ -17,9 +16,8 @@ function share_secret(secret, n, k){
     coefficients[0] = secretNumber;
    //console.log("coefficients[0]: "+coefficients[0]);
     for(i=1; i<k; i++){
-        var random = new BN(Math.random());
-        random = random.mul(p);
-        coefficients[i] = random;
+        var random = new BN(crypto.randomInt(1, Math.pow(2, 48)));
+        coefficients[i] = new BN(random)
         console.log("coefficients[ "+i+"]: "+coefficients[i]);
     }
     //calcolo pezzi
