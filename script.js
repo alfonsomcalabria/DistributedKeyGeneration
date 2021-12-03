@@ -39,11 +39,11 @@ function share_secret(secret, n, k){
     //calcolo commitments
     for(k=0; k<coefficients.length; k++){
         commitments[k] = ec.curve.g.mul(coefficients[k]);
+        console.log("Commitments["+k+"]:"+commitments[k].getX()+", "+commitments[k].getY())
     }
     var result = new resultShare(shares, commitments);
     return result;
 }
-
 
 function f(coefficients, x, k){
     var pol = new Array(k-1);
@@ -90,11 +90,14 @@ function lagrange_coefficient(i, shares){
 function verify_share(x, share, commitments){
     var base = new BN(x);
     var result = commitments[0];
-    for(k=1; k<commitments.length; k++){
+    //console.log(result.getX()+", "+result.getY());
+    for(k=0; k<commitments.length-1; k++){
         esp = new BN(k+1)
-        result = result.add(commitments[k].mul(base.pow(esp).mod(p)));
+        prod = commitments[k+1].mul(base.pow(esp).mod(p));
+        result = result.add(prod)
     }
-    return ec.curve.g.mul(share) == result;
+    verify = ec.curve.g.mul(share);
+    return verify.eq(result);
 }
 
 function setShares(share, k, pieces){
