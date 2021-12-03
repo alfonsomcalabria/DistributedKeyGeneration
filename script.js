@@ -93,8 +93,9 @@ function verify_share(x, share, commitments){
     //console.log(result.getX()+", "+result.getY());
     for(k=0; k<commitments.length-1; k++){
         esp = new BN(k+1)
-        prod = commitments[k+1].mul(base.pow(esp).mod(p));
-        result = result.add(prod)
+        //prod = commitments[k+1].mul(base.pow(esp).mod(p));
+        //result = result.add(prod)
+        result = result.add(commitments[k+1].mul(base.pow(esp).mod(p)));
     }
     verify = ec.curve.g.mul(share);
     return verify.eq(result);
