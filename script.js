@@ -2,10 +2,16 @@ const BN = require('bn.js')
 const Share = require('./Share');
 const crypto = require('crypto');
 const resultShare = require('./resultShare');
+const Pigreco = require('./pigreco');
+const Web3 = require('web3');
+
 const ec = require('./alt_bn128');
 
+// keccak256 implemented in Solidity
+const sha3 = Web3.utils.soliditySha3;
 
-var p = new BN("30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47", "hex");
+//var p = new BN("30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47", "hex");
+var p = new BN("30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001", "hex"); //n della curva, chi è l'ordine? CHIEDERE AD ANTONIO
 
 var threshold = new BN(0);
 
@@ -101,6 +107,29 @@ function verify_share(x, share, commitments){
     return verify.eq(result);
 }
 
+function sha3ToBN(hexString) {
+    return new BN(hexString.split('x')[1], 'hex')
+}
+
+function dleq(x1, y1, x2, y2, alpha){
+    w = new BN(crypto.randomInt(1, Math.pow(2, 48)));
+    a1 = x1.mul(w);
+    a2 = x2.mul(w);
+    c = sha3ToBN(sha3(a1.getX(), a1.getY(), a2.getX(), a2.getY(), x1.getX(), x1.getY(), y1.getX(), y1.getY(), x2.getX(), x2.getY(), y2.getX(), y2.getY()))
+    prod = alpha.mul(c);
+    r = w.sub(prod);
+    r = r.umod(p);  //umod perchè r è negativo
+    var pigreco = new Pigreco(c, r);
+    return pigreco;
+}
+
+function dleq_verify(x1, y1, x2, y2, pigreco){
+    a1 = (x1.mul(pigreco.r)).add(y1.mul(pigreco.c));
+    a2 = (x2.mul(pigreco.r)).add(y2.mul(pigreco.c));
+    c = sha3ToBN(sha3(a1.getX(), a1.getY(), a2.getX(), a2.getY(), x1.getX(), x1.getY(), y1.getX(), y1.getY(), x2.getX(), x2.getY(), y2.getX(), y2.getY())) 
+    return c.eq(pigreco.c)
+}
+
 function setShares(share, k, pieces){
     var shareRec = new Array(k);
     for(i=0; i<k; i++){
@@ -114,5 +143,7 @@ module.exports = {
     share_secret: share_secret,
     recover_secret: recover_secret,
     verify_share: verify_share,
-    setShares: setShares
+    setShares: setShares,
+    dleq: dleq,
+    dleq_verify: dleq_verify
 };

@@ -6,6 +6,9 @@ var resultShare = require('./resultShare');
 const app = express()
 const port = 3000
 
+const ec = require('./alt_bn128');
+const Pigreco = require('./pigreco');
+
 const n = 6;
 const k = 3;
 var shares;
@@ -37,6 +40,14 @@ app.get('/recovery', (req, res) => {
 app.get('/verify', (req, res) => {
   res.send('Verify')
   console.log(script.verify_share(shares[2].x, shares[2].value , commitments));
+  var alpha = new BN(17);
+  var x1 = ec.curve.g;
+  var x2 = ec.curve.g.mul(new BN(4711));
+  var y1 = x1.mul(alpha);
+  var y2 = x2.mul(alpha);
+  var pigreco = script.dleq(x1, y1, x2, y2, alpha);
+  var verify_dleq = script.dleq_verify(x1, y1, x2, y2, pigreco);
+  console.log(verify_dleq);
 
 })
 
