@@ -11,13 +11,16 @@ const ec = require('./alt_bn128');
 const sha3 = Web3.utils.soliditySha3;
 
 //var p = new BN("30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47", "hex");
-var p = new BN("30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001", "hex"); //n della curva, chi è l'ordine? CHIEDERE AD ANTONIO
+var p = new BN("30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001", "hex"); 
 
 var threshold = new BN(0);
 
 //var string = 'MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDePqM6BupZNJkriuBB2Rg0ZGiV0OyonRjiWHY0+B5urSec256si7540VAtEcJFXie6JfeSfTCMAZKGGBtm48Ac+WD6Yx6cDf29tAc5JWkMVFlTjTYnjjK9Uex3MewkBzlzBFSXniWt8tNLz6qxZ6++ChUa5c5mCN6Vog+cH5Rqpb+IF+sYH29wA9916dGZIO85w6toOEfIR+VbYeS7wvRhTJA4ielpbOBnhuovGvtMM7P06lDoi9grw0Dz2JE0WtjCLExx6Svgat/0e/cHOdBtwyjC5RqhpZtru77fk/48suz7mfKS/fRaXvA13CkKju0RXFcalpGJaymO0l6B+b9AgMBAAECggEBAKlLp8V1LSGE+sT7hndCq7iFYFH3k7+h5CnP30PcWjpO9uT7O3UPAqpAMEYUyBtVbQfVEjFp4ghUzkwNoxoOlfK8WQ6DYPbZhZfzwqjagZodyunloQIixSSdw96OYyNxtEGs4OkRA+Uz3s9OFPu7jIDGwtoEF2+NIEF6F1ERGniUAS9UJ1Sd+hS5q9p3GkfhO99gUrTjZ0VlpDaSjg+5sw5f+a7GzcxK+0qnv2U/nrg8MlGKL6wFFx83G5D6EVJ4Zyw+hrdMe4sp9QjYrRXHfzdjou5Q0VO9fZCEjLVMeoMnZS9SiDYA0qYSZbHG8f5BVV9nGR3X2rbqVIQaiirCc/UCgYEA/2UvlzJPcsMlq4TqA/UiDlVR7mWkeuizpRz687IOHvIYvZxQqRU4X2halKalsF7avi8np2JL6dlngYRaUKS8KfUTujZG5wnrdkbLz11hsF+uhbkw3VxDGmklXvs49vXZjTJifXcvzTFGXf7zGB6bjufEKCLupyeKMymOPkHMY4MCgYEA3sVbToF+zUwGbV2xEYv5/MCYwEffX+LENrGpI+4MXBTA7VwlAXK3l8StzYL6eRQk2tULsAxV7BNp2LacFeJD3BgFH3vEFhbn097h0l/T3ozlRWUEeS39qAPZgVinhGK/71pwAa9CFs6Hbepwqq9aZzMCX4AcINJkIyA5jUwoA38CgYEA2ydL8DVGwZa9g3IZkW3PXHdQR/7GZoW6aev1WBqpTVq3ajVxbbX82rnkSHy73x12HQ6/uz15IODildwp19uUb3iTBg4/R1BW0fasO3PJORzR2IPyb3EVT9t8KwXuetS6axQaOcmFplErLctxdHgHSliNFVfsbFlcmMyG99tkdNsCgYB6r5xKjxzDebQsdSX4cOubXIKDmtGVYDEJoixxoj9iUvexgUbMFl6wEdxaS2EgX4ywjBZkvVZwrnxjoqYxkywmQYBIx4PFWpYQZDZgAvCPJ295GVouVrrU1lHqX2XajfwAmQEInHm8T7/cM/oatnoGTdxntglHtjb59Vxcye1bhwKBgQDXIeibcyEDBYjOiwY4MhFzn2GJO6m/sXjCt+KVqqhCsHoglAtsnR+qPzOqAy7e3TKUrGkOZ0/UnvNVM7d0ZsZ6GXNA/F/3j/XoSwTcMFeUbANs0pTQb+NtTUFUB9D5ByXDye22//HYFlxK3KD24gspEaexeK6hxFkcuVv3j9XrNA==';
 //var result = new TextDecoder().decode(byte);
 //console.log("result "+result);
+var h_x = new BN('1581953BCF3CE078038FA19D974E26E4757A0E65573D9628EC8939BB77A6FD04', 'hex');
+var h_y = new BN('B1FD6EDA65BD4E6866A28BCCFEE143309BFB597378217A2002E5CAC8CFE645F', 'hex');
+var h = ec.curve.point(h_x, h_y);
 
 function share_secret(secret, n, k){
     var shares = new Array(n);
@@ -138,6 +141,27 @@ function setShares(share, k, pieces){
     return shareRec;
 }
 
+function derivePublicKey(shares){
+    var mpk = new BN(1);
+    var msk = new BN(0);
+    for(i=0; i<shares.length; i++){
+       msk = msk.add(new BN(shares[i]));
+    }
+    console.log("msk: "+msk)
+    mpk = h.mul(msk);
+    return mpk;
+}
+
+function randomSecret(){
+    var shares = new Array(5);
+    for(i=0; i<shares.length; i++){
+        shares[i] = new BN(crypto.randomInt(1, Math.pow(2, 48)));
+        console.log("shares["+i+"]: "+shares[i]);
+    }
+    return shares;
+
+}
+
 
 module.exports = {
     share_secret: share_secret,
@@ -145,5 +169,7 @@ module.exports = {
     verify_share: verify_share,
     setShares: setShares,
     dleq: dleq,
-    dleq_verify: dleq_verify
+    dleq_verify: dleq_verify,
+    derivePublicKey: derivePublicKey,
+    randomSecret: randomSecret
 };

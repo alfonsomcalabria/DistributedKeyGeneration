@@ -8,6 +8,7 @@ const port = 3000
 
 const ec = require('./alt_bn128');
 const Pigreco = require('./pigreco');
+const { derivePublicKey, randomSecret } = require('./script');
 
 const n = 6;
 const k = 3;
@@ -49,6 +50,13 @@ app.get('/verify', (req, res) => {
   var verify_dleq = script.dleq_verify(x1, y1, x2, y2, pigreco);
   console.log(verify_dleq);
 
+})
+
+app.get('/derivempk', (req, res) => {
+  res.send('Calcolo mpk');
+  var shares = randomSecret();
+  console.log("Shares: "+ shares);
+  console.log(derivePublicKey(shares));
 })
 
 app.listen(port, () => {
