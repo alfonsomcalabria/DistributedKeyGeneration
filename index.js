@@ -54,9 +54,10 @@ app.get('/verify', (req, res) => {
 
 app.get('/derivempk', (req, res) => {
   res.send('Calcolo mpk');
+  console.log(script.partialPublicKey(602548));
   var shares = randomSecret();
   console.log("Shares: "+ shares);
-  console.log(derivePublicKey(shares));
+  //console.log(derivePublicKey(shares));
 })
 
 app.listen(port, () => {

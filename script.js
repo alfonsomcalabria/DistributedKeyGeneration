@@ -141,6 +141,10 @@ function setShares(share, k, pieces){
     return shareRec;
 }
 
+function partialPublicKey(secret){
+    return h.mul(secret);
+}
+
 function derivePublicKey(shares){
     var mpk = new BN(1);
     var msk = new BN(0);
@@ -171,5 +175,6 @@ module.exports = {
     dleq: dleq,
     dleq_verify: dleq_verify,
     derivePublicKey: derivePublicKey,
-    randomSecret: randomSecret
+    randomSecret: randomSecret,
+    partialPublicKey: partialPublicKey
 };
