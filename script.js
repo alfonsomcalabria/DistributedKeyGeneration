@@ -166,6 +166,28 @@ function randomSecret(){
 
 }
 
+function registration(){
+    var sk = new BN(crypto.randomInt(1, Math.pow(2, 48)));
+    var pk = ec.curve.g.mul(sk);
+    var key = {
+        pk: pk,
+        sk : sk
+    }
+    return key
+}
+
+function sharedKey(sk, pk){
+    var kij = pk.mul(sk);
+    return kij;
+}
+
+function encryptShare(share, kij, j){
+    var x = kij.getX();
+    var h = sha3ToBN(sha3(x, j));
+    return share.xor(h);
+}
+
+
 
 module.exports = {
     share_secret: share_secret,
@@ -176,5 +198,8 @@ module.exports = {
     dleq_verify: dleq_verify,
     derivePublicKey: derivePublicKey,
     randomSecret: randomSecret,
-    partialPublicKey: partialPublicKey
+    partialPublicKey: partialPublicKey,
+    registration: registration,
+    sharedKey: sharedKey,
+    encryptShare: encryptShare
 };

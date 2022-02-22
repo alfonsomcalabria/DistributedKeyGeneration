@@ -17,8 +17,22 @@ var commitments;
 var result = {}
 var pieces = [1, 3, 5];
 
+var encryptShare, k1_2, k2_1;
+
 app.get('/', (req, res) => {
   res.send('Prova')
+})
+
+app.get('/registration', (req, res) => {
+  res.send('Registrazione')
+  var key1 = script.registration();
+  var key2 = script.registration();
+  k1_2 = script.sharedKey(key1.sk, key2.pk);
+  encryptShare = script.encryptShare(new BN('3ADE68B1', 'hex'), k1_2, 2);
+  console.log(encryptShare);
+  k2_1 = script.sharedKey(key2.sk, key1.pk);
+  var decryptShare = script.encryptShare(new BN(encryptShare, 'hex'), k2_1, 2);
+  console.log(decryptShare);
 })
 
 
